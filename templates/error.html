@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Error — VendorCheck{% endblock %}
+{% block body %}
+<div style="padding:32px 0">
+  <h1>Something went wrong</h1>
+  <div style="background:var(--critical-bg);border:1px solid var(--critical-border);color:#7f1d1d;padding:16px;border-radius:var(--radius);font-size:14px">{{ msg }}</div>
+  <p style="margin-top:20px"><a class="btn" href="/">Try again</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Waiting for payment — VendorCheck{% endblock %}
+{% block body %}
+<div class="box" id="wait" style="text-align:center;padding:40px 20px">
+  <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 16px"></div>
+  <div style="font-size:18px;font-weight:600;margin-bottom:8px">Check your phone</div>
+  <div style="color:var(--muted);font-size:14px">Enter your M-Pesa PIN to complete payment.</div>
+</div>
+
+<div id="done" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-lg);padding:28px;margin:20px 0;text-align:center">
+  <div style="font-size:22px;font-weight:600;color:var(--success);margin-bottom:8px">Payment confirmed</div>
+  <div style="color:#166534;font-size:14px;margin-bottom:18px">Your cleaned CSV is ready.</div>
+  <a class="btn" href="/download/{{ checkout_id }}">Download cleaned CSV</a>
+</div>
+
+<div id="fail" style="display:none;background:var(--critical-bg);border:1px solid var(--critical-border);color:#7f1d1d;padding:16px;border-radius:var(--radius);font-size:14px">
+  Payment did not go through. <a href="/" style="color:#7f1d1d;font-weight:600">Try again</a>.
+</div>
+
+<style>@keyframes sp{to{transform:rotate(360deg)}}</style>
+<script>
+var id = "{{ checkout_id }}";
+var tries = 0;
+var poll = async function() {
+  tries++;
+  try {
+    var r = await fetch('/order/' + id + '/status');
+    var d = await r.json();
+    if (d.paid) {
+      document.getElementById('wait').style.display = 'none';
+      document.getElementById('done').style.display = 'block';
+      return;
+    }
+  } catch(e) {}
+  if (tries > 40) {
+    document.getElementById('wait').style.display = 'none';
+    document.getElementById('fail').style.display = 'block';
+    return;
+  }
+  setTimeout(poll, 3000);
+};
+setTimeout(poll, 2000);
+</script>
+{% endblock %}

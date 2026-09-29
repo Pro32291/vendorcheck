@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}VendorCheck{% endblock %}</title>
+<meta name="description" content="Scan a vendor CSV for duplicate bank accounts, shared KRA TINs, and missing PINs. Processed on our server. Deleted after 24h.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fafafa;--surface:#fff;--text:#0a0a0a;--muted:#525252;--subtle:#737373;--border:#e5e5e5;--border-strong:#d4d4d4;--accent:#0a0a0a;--critical:#b91c1c;--critical-bg:#fef2f2;--critical-border:#fecaca;--success:#15803d;--warning:#b45309;--warning-bg:#fffbeb;--radius:10px;--radius-lg:14px;--shadow-sm:0 1px 2px rgba(0,0,0,.04);--shadow-lg:0 12px 32px rgba(0,0,0,.08);}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  code{font-family:ui-monospace,'SF Mono',Menlo,monospace}
+  .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .nav-inner{max-width:920px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .logo-mark{width:22px;height:22px;background:var(--accent);color:#fff;border-radius:6px;display:grid;place-items:center;font-size:12px;font-weight:700}
+  .dev-badge{background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-left:auto}
+  .nav a.link{font-size:13px;color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:6px}
+  .nav a.link:hover{background:#f5f5f5;color:var(--text)}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:0;padding:13px 22px;border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none}
+  .btn:hover{background:#262626}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border-strong)}
+  .btn.red{background:var(--critical)}
+  .btn.big{width:100%;padding:15px;justify-content:center;margin-top:8px}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin:16px 0}
+  footer{margin-top:72px;padding:32px 20px;border-top:1px solid var(--border);text-align:center;font-size:12.5px;color:var(--subtle);line-height:1.7}
+  footer a{color:var(--text);text-decoration:none;font-weight:500;border-bottom:1px solid var(--border-strong)}
+  h1{font-size:clamp(26px,5vw,40px);letter-spacing:-.02em;line-height:1.15;margin:0 0 16px}
+  h2{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 8px}
+  .lede{font-size:16px;color:var(--muted);margin:0 0 24px}
+  @media(max-width:640px){.wrap{padding:0 16px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-mark">V</span>VendorCheck{% if dev_mode %}<span class="dev-badge">DEV</span>{% endif %}</div>
+    <a class="link" href="mailto:{{ pay_email|default('bsquaressoftwares@gmail.com') }}">Contact</a>
+  </div>
+</nav>
+<div class="wrap">
+{% block body %}{% endblock %}
+</div>
+<footer>
+  <p>Built in Kenya. Files processed on our server and deleted within 24 hours. We do not share your data.<br>
+  Questions? <a href="mailto:{{ pay_email|default('bsquaressoftwares@gmail.com') }}">{{ pay_email|default('bsquaressoftwares@gmail.com') }}</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}VendorCheck — Vendor Risk Audit for Kenyan Manufacturers{% endblock %}
+{% block body %}
+<section style="padding:56px 0 32px;text-align:center">
+  <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--subtle);margin-bottom:20px">For Kenyan finance &amp; audit teams</div>
+  <h1>Your vendor list has fraud in it.<br>Find it <span style="color:var(--critical)">before your auditor does.</span></h1>
+  <p class="lede" style="max-width:640px;margin:0 auto 28px">Upload a vendor CSV. Free scan for duplicate bank accounts, shared KRA TINs, missing PINs, and near-duplicate vendors — in seconds. Processed on our server. Deleted within 24 hours.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="#scan" class="btn">Scan a file — free</a>
+    <a href="#how" class="btn ghost">How it works</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius-lg);overflow:hidden;margin:44px 0 0">
+    <div style="background:var(--surface);padding:22px 18px;text-align:center">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Deleted in 24h</div>
+      <div style="font-size:12.5px;color:var(--subtle);line-height:1.4">Removed from our servers daily</div>
+    </div>
+    <div style="background:var(--surface);padding:22px 18px;text-align:center">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">No signup</div>
+      <div style="font-size:12.5px;color:var(--subtle);line-height:1.4">No email, no login, no tracking</div>
+    </div>
+    <div style="background:var(--surface);padding:22px 18px;text-align:center">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Built for Kenya</div>
+      <div style="font-size:12.5px;color:var(--subtle);line-height:1.4">KRA TIN format &amp; local patterns</div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="margin-top:56px">
+  <div style="text-align:center;margin-bottom:20px">
+    <h2>Three steps. Ten seconds.</h2>
+    <p style="color:var(--muted);margin:0;font-size:14.5px">No installation. No sales call. No account.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    <div class="box">
+      <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">1</div>
+      <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">Drop your CSV</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">Any vendor list with name, TIN, and bank columns. Column names don't need to match exactly.</div>
+    </div>
+    <div class="box">
+      <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">2</div>
+      <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">We flag risk</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">Same bank across different TINs, shared TINs, invalid formats, near-duplicate names — instantly.</div>
+    </div>
+    <div class="box">
+      <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">3</div>
+      <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">Unlock the clean file</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">KES 500 gets you the full cleaned CSV, all flags, and a per-vendor report you can act on.</div>
+    </div>
+  </div>
+</section>
+
+<div style="background:var(--critical-bg);border:1px solid var(--critical-border);border-radius:var(--radius-lg);padding:20px;margin:40px 0;display:flex;gap:16px;align-items:flex-start">
+  <div style="flex-shrink:0;width:32px;height:32px;border-radius:8px;background:var(--critical);color:#fff;display:grid;place-items:center;font-size:16px;font-weight:700">!</div>
+  <div>
+    <div style="font-size:14.5px;font-weight:600;color:#7f1d1d;margin-bottom:6px">Two vendors sharing a bank account, with different TINs, is the #1 payment fraud vector in Kenya.</div>
+    <div style="font-size:13.5px;color:#7f1d1d;line-height:1.55">Spreadsheet formulas miss it because <code style="background:rgba(185,28,28,.1);padding:1px 5px;border-radius:3px;font-size:12px">TIN</code> and <code style="background:rgba(185,28,28,.1);padding:1px 5px;border-radius:3px;font-size:12px">bank_account</code> live in different columns. Your auditor will catch it. You want to catch it first.</div>
+  </div>
+</div>
+
+<div id="scan">
+  <div style="text-align:center;margin:0 0 20px">
+    <h2>Scan your vendor list</h2>
+    <p style="color:var(--muted);margin:0;font-size:14.5px">Free. No email required. Results appear instantly.</p>
+  </div>
+  <form action="/scan" method="post" enctype="multipart/form-data">
+    <label for="file" class="box" style="border:2px dashed var(--border-strong);text-align:center;padding:44px 20px;cursor:pointer;display:block">
+      <div style="width:48px;height:48px;margin:0 auto 16px;background:#f5f5f5;border-radius:12px;display:grid;place-items:center;font-size:22px">&#128196;</div>
+      <div style="font-size:15.5px;font-weight:600;margin-bottom:4px">Choose a CSV file</div>
+      <div style="font-size:13px;color:var(--subtle)">.csv only · processed on our server · deleted after 24h</div>
+    </label>
+    <input type="file" id="file" name="file" accept=".csv" required onchange="this.form.submit()" style="display:none">
+  </form>
+</div>
+
+<section style="margin-top:56px">
+  <h2 style="text-align:center;margin-bottom:24px">Common questions</h2>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">Is my data safe?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">Yes. Your file is uploaded over HTTPS, scanned on our server, and deleted automatically within 24 hours. We do not share your data with anyone. Kenya Data Protection Act 2019 aware.</div>
+  </details>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">What CSV format do I need?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">Any CSV with a header row. It looks for columns named name, tin (or kra_pin), bank_account (or account), phone, and email. Close variations are detected automatically.</div>
+  </details>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">Why KES 500?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">Enterprise vendor MDM platforms cost KES 5M+ per year and are built for 5,000-person companies. One fraudulent vendor payment averages KES 2.4M. KES 500 is roughly 1/10,000th the cost of a single fraud incident.</div>
+  </details>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">How do I pay?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">M-Pesa, through Paystack. Enter your email and phone number on the results page, tap pay, and you'll get the M-Pesa prompt on your phone. The download unlocks automatically once payment confirms.</div>
+  </details>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">What happens after I unlock?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">You get the full cleaned CSV with a <code>flags</code> column per vendor — every flagged vendor marked with the specific issue: MISSING_TIN, SAME_BANK_DIFF_TIN, NEAR_DUPLICATE_NAME, and so on. Filter in Excel and start calling vendors to verify.</div>
+  </details>
+
+  <details class="box" style="padding:0;overflow:hidden">
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">Do you store my file?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">We store it on our server only to generate your cleaned report, and delete it automatically within 24 hours. We never share it with third parties.</div>
+  </details>
+</section>
+{% endblock %}
