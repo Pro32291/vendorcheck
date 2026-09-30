@@ -9,8 +9,14 @@
 
 <div id="done" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-lg);padding:28px;margin:20px 0;text-align:center">
   <div style="font-size:22px;font-weight:600;color:var(--success);margin-bottom:8px">Payment confirmed</div>
-  <div style="color:#166534;font-size:14px;margin-bottom:18px">Your cleaned CSV is ready.</div>
-  <a class="btn" href="/download/{{ checkout_id }}">Download cleaned CSV</a>
+  <div style="color:#166534;font-size:14px;margin-bottom:20px">Your cleaned CSV is ready.</div>
+
+  <a class="btn" href="/download/{{ checkout_id }}" style="margin-bottom:16px">Download cleaned CSV</a>
+
+  <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:14px;margin-top:16px;font-size:13px;color:#166534;text-align:left;line-height:1.6">
+    <strong style="display:block;margin-bottom:4px">We also emailed you the file.</strong>
+    Check the inbox of the email you entered. The cleaned CSV is attached — keep that copy for your audit trail. If you don't see it within a few minutes, check your <strong>Spam</strong> folder.
+  </div>
 </div>
 
 <div id="fail" style="display:none;background:var(--critical-bg);border:1px solid var(--critical-border);color:#7f1d1d;padding:16px;border-radius:var(--radius);font-size:14px">

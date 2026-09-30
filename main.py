@@ -1,16 +1,20 @@
-import os, csv, io, json, time, sqlite3, secrets, hmac, hashlib, re
+import os, csv, io, json, time, sqlite3, secrets, hmac, hashlib, re, base64
 from contextlib import closing
 from difflib import SequenceMatcher
 from collections import defaultdict
 from pathlib import Path
 
 import httpx
+from openpyxl import load_workbook, Workbook
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
 DEV_MODE        = os.environ.get("DEV_MODE", "1") == "1"
 PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY", "")
+BREVO_API_KEY   = os.environ.get("BREVO_API_KEY", "")
+FROM_EMAIL      = os.environ.get("FROM_EMAIL", "bsquaressoftwares@gmail.com")
+FROM_NAME       = os.environ.get("FROM_NAME", "VendorCheck")
 PRICE_KOBO      = int(os.environ.get("PRICE_KOBO", "50000"))
 PRICE_DISPLAY   = os.environ.get("PRICE_DISPLAY", "500")
 DB_PATH         = os.environ.get("DB_PATH", "data/vendorcheck.db")
@@ -41,6 +45,42 @@ def purge_old():
         conn.execute("DELETE FROM orders WHERE created < ?", (cutoff,))
         conn.commit()
 
+def read_csv_records(raw_bytes):
+    text = raw_bytes.decode("utf-8", errors="ignore")
+    reader = csv.DictReader(io.StringIO(text))
+    return [dict(r) for r in reader]
+
+def read_xlsx_records(raw_bytes):
+    wb = load_workbook(io.BytesIO(raw_bytes), read_only=True, data_only=True)
+    ws = wb.active
+    it = ws.iter_rows(values_only=True)
+    try:
+        headers = [str(h).strip() if h is not None else "" for h in next(it)]
+    except StopIteration:
+        return []
+    out = []
+    for row in it:
+        if all(c is None or str(c).strip() == "" for c in row):
+            continue
+        d = {}
+        for i, h in enumerate(headers):
+            if i < len(row):
+                v = row[i]
+                d[h] = "" if v is None else str(v)
+        out.append(d)
+    return out
+
+def records_from_upload(filename, raw_bytes):
+    fn = (filename or "").lower()
+    if fn.endswith(".xlsx") or fn.endswith(".xls"):
+        return read_xlsx_records(raw_bytes)
+    if fn.endswith(".csv"):
+        return read_csv_records(raw_bytes)
+    try:
+        return read_csv_records(raw_bytes)
+    except Exception:
+        return read_xlsx_records(raw_bytes)
+
 TIN_RE = re.compile(r"^[A-Z]{1,2}\d{6,9}[A-Z]$")
 COLS = {
     "name": ["name","vendor","vendor_name","supplier","supplier_name","company"],
@@ -66,10 +106,9 @@ def ratio(a, b):
     if not a or not b: return 0.0
     return SequenceMatcher(None, a, b).ratio()
 
-def clean_csv(text):
-    reader = csv.DictReader(io.StringIO(text))
+def clean_records(records):
     rows = []
-    for r in reader:
+    for r in records:
         rows.append({
             "name":  pick(r, COLS["name"]).strip(),
             "tin":   ntin(pick(r, COLS["tin"])),
@@ -77,7 +116,8 @@ def clean_csv(text):
             "phone": ndig(pick(r, COLS["phone"])),
             "email": pick(r, COLS["email"]).strip(),
         })
-    if not rows: raise ValueError("No data rows found in the file.")
+    if not rows:
+        raise ValueError("No data rows found in the file.")
 
     tin_map = defaultdict(list); bank_map = defaultdict(list)
     for i, r in enumerate(rows):
@@ -131,19 +171,72 @@ def rows_to_csv(rows):
     for r in rows: w.writerow({k: r[k] for k in w.fieldnames})
     return out.getvalue()
 
+async def send_csv_email(to_email, original_filename, csv_content, stats):
+    if not BREVO_API_KEY:
+        print("BREVO: no key set, skipping email")
+        return False
+    b64 = base64.b64encode(csv_content.encode("utf-8")).decode("ascii")
+    stem = original_filename.rsplit(".", 1)[0] if "." in original_filename else original_filename
+    clean_name = "cleaned_" + stem + ".csv"
+    html = (
+        "<p>Your cleaned vendor file is attached.</p>"
+        "<p><strong>" + str(stats.get("total", "")) + "</strong> vendors scanned - "
+        "<strong>" + str(stats.get("flagged", "")) + "</strong> flagged - "
+        "<strong>" + str(stats.get("fraud", "")) + "</strong> fraud signals</p>"
+        "<p>Keep this email for your audit trail. The file contains a <code>flags</code> column "
+        "you can filter in Excel or Google Sheets.</p>"
+        "<p>- VendorCheck</p>"
+    )
+    payload = {
+        "sender": {"email": FROM_EMAIL, "name": FROM_NAME},
+        "to": [{"email": to_email}],
+        "subject": "Your cleaned vendor file - " + clean_name,
+        "htmlContent": html,
+        "attachment": [{"content": b64, "name": clean_name}],
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json"},
+                json=payload,
+            )
+            print("BREVO status:", r.status_code, "body:", r.text[:500])
+            return r.status_code in (200, 201, 202)
+    except Exception as e:
+        print("BREVO exception:", repr(e))
+        return False
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("home.html", {
         "request": request, "dev_mode": DEV_MODE, "pay_email": PAY_EMAIL,
     })
 
+@app.get("/template.xlsx")
+def template_xlsx():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Vendors"
+    ws.append(["name", "tin", "bank_account", "phone", "email"])
+    ws.append(["Acme Supplies Ltd", "P051234567X", "0123456789", "0712345678", "info@acme.co.ke"])
+    ws.append(["Beta Traders", "P051234567Y", "0987654321", "0700000000", "b@beta.co.ke"])
+    ws.append(["Gamma Ltd", "P051234568Z", "1122334455", "0711111111", "g@gamma.co.ke"])
+    buf = io.BytesIO()
+    wb.save(buf)
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="vendor_template.xlsx"'},
+    )
+
 @app.post("/scan", response_class=HTMLResponse)
 async def scan(request: Request, file: UploadFile = File(...)):
     purge_old()
     raw = await file.read()
-    text = raw.decode("utf-8", errors="ignore")
     try:
-        rows, summary, flagged, fraud = clean_csv(text)
+        records = records_from_upload(file.filename, raw)
+        rows, summary, flagged, fraud = clean_records(records)
     except Exception as e:
         return templates.TemplateResponse("error.html", {
             "request": request, "msg": str(e), "dev_mode": DEV_MODE,
@@ -193,6 +286,9 @@ async def pay(request: Request, checkout_id: str = Form(...), email: str = Form(
         with closing(db()) as conn:
             conn.execute("UPDATE orders SET paid = 1 WHERE checkout_id = ?", (checkout_id,))
             conn.commit()
+        await send_csv_email(email, order["filename"], order["cleaned_csv"], {
+            "total": order["total"], "flagged": order["flagged"], "fraud": order["fraud"],
+        })
         return templates.TemplateResponse("waiting.html", {
             "request": request, "checkout_id": checkout_id, "dev_mode": DEV_MODE,
         })
@@ -239,10 +335,19 @@ async def paystack_webhook(request: Request):
     if event.get("event") == "charge.success":
         ref = event.get("data", {}).get("reference", "")
         if ref.startswith("VC-"):
+            cid = ref[3:]
             with closing(db()) as conn:
-                conn.execute("UPDATE orders SET paid = 1 WHERE checkout_id = ?", (ref[3:],))
+                conn.execute("UPDATE orders SET paid = 1 WHERE checkout_id = ?", (cid,))
                 conn.commit()
+                row = conn.execute("SELECT * FROM orders WHERE checkout_id = ?", (cid,)).fetchone()
+            if row and row["email"]:
+                try:
+                    await send_csv_email(row["email"], row["filename"], row["cleaned_csv"], {
+                        "total": row["total"], "flagged": row["flagged"], "fraud": row["fraud"],
+                    })
+                except Exception as e:
+                    print("webhook email failed:", repr(e))
     return {"status": "ok"}
 
 @app.get("/healthz")
-def health(): return {"ok": True, "dev_mode": DEV_MODE}
+def health(): return {"ok": True, "dev_mode": DEV_MODE, "brevo": bool(BREVO_API_KEY)}

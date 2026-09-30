@@ -4,7 +4,7 @@
 <section style="padding:56px 0 32px;text-align:center">
   <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--subtle);margin-bottom:20px">For Kenyan finance &amp; audit teams</div>
   <h1>Your vendor list has fraud in it.<br>Find it <span style="color:var(--critical)">before your auditor does.</span></h1>
-  <p class="lede" style="max-width:640px;margin:0 auto 28px">Upload a vendor CSV. Free scan for duplicate bank accounts, shared KRA TINs, missing PINs, and near-duplicate vendors — in seconds. Processed on our server. Deleted within 24 hours.</p>
+  <p class="lede" style="max-width:640px;margin:0 auto 28px">Upload a vendor list. Free scan for duplicate bank accounts, shared KRA TINs, missing PINs, and near-duplicate vendors — in seconds. Processed on our server. Deleted within 24 hours.</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
     <a href="#scan" class="btn">Scan a file — free</a>
     <a href="#how" class="btn ghost">How it works</a>
@@ -34,8 +34,8 @@
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
     <div class="box">
       <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">1</div>
-      <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">Drop your CSV</div>
-      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">Any vendor list with name, TIN, and bank columns. Column names don't need to match exactly.</div>
+      <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">Drop your file</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">Excel (.xlsx) or CSV. Any vendor list with name, TIN, and bank columns.</div>
     </div>
     <div class="box">
       <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">2</div>
@@ -45,7 +45,7 @@
     <div class="box">
       <div style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px">3</div>
       <div style="font-weight:600;font-size:14.5px;margin-bottom:6px">Unlock the clean file</div>
-      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">KES 500 gets you the full cleaned CSV, all flags, and a per-vendor report you can act on.</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.5">KES 500 gets you the full cleaned CSV, emailed to you, plus an instant download.</div>
     </div>
   </div>
 </section>
@@ -63,13 +63,26 @@
     <h2>Scan your vendor list</h2>
     <p style="color:var(--muted);margin:0;font-size:14.5px">Free. No email required. Results appear instantly.</p>
   </div>
+
+  <details class="box" style="padding:0;overflow:hidden;margin-bottom:16px">
+    <summary style="padding:14px 20px;font-size:14px;font-weight:600;cursor:pointer;list-style:none;color:var(--text)">Where do I find my vendor list?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.7">
+      <p style="margin:0 0 8px"><strong>Excel or Google Sheets:</strong> Open your vendor/supplier sheet → File → Save As / Download as <code>.xlsx</code>.</p>
+      <p style="margin:0 0 8px"><strong>QuickBooks:</strong> Vendors → Export to Excel.</p>
+      <p style="margin:0 0 8px"><strong>Sage Pastel / Evolution:</strong> Suppliers → Export list → Excel.</p>
+      <p style="margin:0 0 8px"><strong>Odoo:</strong> Purchase → Vendors → Export → XLSX.</p>
+      <p style="margin:0 0 8px"><strong>No list at all?</strong> Download our template, fill it in, and scan it. Takes 5 minutes for 30 vendors.</p>
+      <p style="margin:12px 0 0"><a class="btn ghost" href="/template.xlsx" style="font-size:13px;padding:8px 14px">Download vendor template (.xlsx)</a></p>
+    </div>
+  </details>
+
   <form action="/scan" method="post" enctype="multipart/form-data">
     <label for="file" class="box" style="border:2px dashed var(--border-strong);text-align:center;padding:44px 20px;cursor:pointer;display:block">
       <div style="width:48px;height:48px;margin:0 auto 16px;background:#f5f5f5;border-radius:12px;display:grid;place-items:center;font-size:22px">&#128196;</div>
-      <div style="font-size:15.5px;font-weight:600;margin-bottom:4px">Choose a CSV file</div>
-      <div style="font-size:13px;color:var(--subtle)">.csv only · processed on our server · deleted after 24h</div>
+      <div style="font-size:15.5px;font-weight:600;margin-bottom:4px">Choose a file — .xlsx or .csv</div>
+      <div style="font-size:13px;color:var(--subtle)">Processed on our server · deleted after 24h</div>
     </label>
-    <input type="file" id="file" name="file" accept=".csv" required onchange="this.form.submit()" style="display:none">
+    <input type="file" id="file" name="file" accept=".csv,.xlsx,.xls" required onchange="this.form.submit()" style="display:none">
   </form>
 </div>
 
@@ -82,8 +95,8 @@
   </details>
 
   <details class="box" style="padding:0;overflow:hidden">
-    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">What CSV format do I need?</summary>
-    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">Any CSV with a header row. It looks for columns named name, tin (or kra_pin), bank_account (or account), phone, and email. Close variations are detected automatically.</div>
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">What file format do I need?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">Excel (.xlsx) or CSV. It looks for columns named name, tin (or kra_pin), bank_account (or account), phone, and email. Close variations are detected automatically. If you don't have a list, <a href="/template.xlsx" style="color:var(--text);font-weight:500">download our template</a>.</div>
   </details>
 
   <details class="box" style="padding:0;overflow:hidden">
@@ -92,8 +105,8 @@
   </details>
 
   <details class="box" style="padding:0;overflow:hidden">
-    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">How do I pay?</summary>
-    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">M-Pesa, through Paystack. Enter your email and phone number on the results page, tap pay, and you'll get the M-Pesa prompt on your phone. The download unlocks automatically once payment confirms.</div>
+    <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">How do I pay and get the file?</summary>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">M-Pesa, through Paystack. Enter your email and phone number on the results page, tap pay, and you'll get the M-Pesa prompt on your phone. Once payment confirms, the cleaned CSV is <strong>emailed to you as an attachment</strong> and also available for direct download.</div>
   </details>
 
   <details class="box" style="padding:0;overflow:hidden">
@@ -103,7 +116,7 @@
 
   <details class="box" style="padding:0;overflow:hidden">
     <summary style="padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;list-style:none">Do you store my file?</summary>
-    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">We store it on our server only to generate your cleaned report, and delete it automatically within 24 hours. We never share it with third parties.</div>
+    <div style="padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.65">We store it on our server only to generate your cleaned report, and delete it automatically within 24 hours. The cleaned file is also emailed to the address you enter — that copy is yours to keep.</div>
   </details>
 </section>
 {% endblock %}
